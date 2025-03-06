@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('t_penjualan', function (Blueprint $table) {
             $table->id('penjualan_id');
-            $table->unsignedBigInteger('user_id');
-            $table->string('pembeli', 150);
-            $table->string('penjualan_kode', 200);
-            $table->dateTime('penjualan_tanggal');
+            $table->unsignedBigInteger('user_id')->index();
+            $table->string('pembeli', 50);
+            $table->string('penjualan_kode', 100)->unique();
+            $table->datetime('penjualan_tanggal');
+            $table->timestamps();
             
-            $table->foreign('user_id')->references('user_id')->on('m_user');
+            $table->foreign('user_id')->references('user_id')->on('m_user')->onDelete('cascade');
         });
     }
 

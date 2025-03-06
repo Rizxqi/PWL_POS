@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('t_penjualan_detail', function (Blueprint $table) {
             $table->id('detail_id');
-            $table->unsignedBigInteger('penjualan_id');
-            $table->unsignedBigInteger('barang_id');
+            $table->unsignedBigInteger('penjualan_id')->index();
+            $table->unsignedBigInteger('barang_id')->index();
             $table->integer('harga');
             $table->integer('jumlah');
+            $table->timestamps();
             
-            $table->foreign('penjualan_id')->references('penjualan_id')->on('t_penjualan');
+            $table->foreign('penjualan_id')->references('penjualan_id')->on('t_penjualan')->onDelete('cascade');
             $table->foreign('barang_id')->references('barang_id')->on('m_barang');
         });
     }
