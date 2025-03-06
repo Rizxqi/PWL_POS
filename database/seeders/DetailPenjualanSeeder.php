@@ -1,10 +1,11 @@
 <?php
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class PenjualanDetailSeeder extends Seeder
+class DetailPenjualanSeeder extends Seeder
 {
     public function run()
     {
@@ -13,7 +14,7 @@ class PenjualanDetailSeeder extends Seeder
                 DB::table('t_penjualan_detail')->insert([
                     'penjualan_id' => $i,
                     'barang_id' => rand(1, 10),
-                    'harga' => rand(6000, 10000),
+                    'harga' => rand(10000, 500000),
                     'jumlah' => rand(1, 5),
                 ]);
             }

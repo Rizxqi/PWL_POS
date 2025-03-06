@@ -1,8 +1,10 @@
 <?php
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PenjualanSeeder extends Seeder
 {
@@ -10,10 +12,10 @@ class PenjualanSeeder extends Seeder
     {
         for ($i = 1; $i <= 10; $i++) {
             DB::table('t_penjualan')->insert([
-                'user_id' => 1, // Sesuaikan dengan user yang ada
+                'user_id' => 1,
                 'pembeli' => 'Pembeli ' . $i,
-                'penjualan_kode' => 'PNJ00' . $i,
-                'penjualan_tanggal' => now(),
+                'penjualan_kode' => 'TRX00' . $i,
+                'penjualan_tanggal' => Carbon::now(),
             ]);
         }
     }
