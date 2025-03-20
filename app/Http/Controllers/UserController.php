@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\LevelModel;
 use App\Models\UserModel;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Monolog\Level;
@@ -26,7 +27,7 @@ class UserController extends Controller
 
         $level = LevelModel::all();
 
-        return view('user.index', ['breadcrumb' => $breadcrumb, 'page' => $page, 'activeMenu' => $activeMenu, 'level'=> $level]);
+        return view('user.index', ['breadcrumb' => $breadcrumb, 'page' => $page, 'activeMenu' => $activeMenu, 'level' => $level]);
     }
 
     public function list(Request $request)
@@ -81,7 +82,7 @@ class UserController extends Controller
 
         $breadcrumb = (object) [
             'title' => 'Detail User',
-            'list' =>['Home', 'User', 'Detail']
+            'list' => ['Home', 'User', 'Detail']
         ];
 
         $page = (object) [
@@ -91,9 +92,9 @@ class UserController extends Controller
         $activeMenu = 'user';
 
         $level = LevelModel::all();
-        return view('user.show',['breadcrumb'=>$breadcrumb,'page'=> $page,'user'=>$user,'activeMenu'=>$activeMenu]);
+        return view('user.show', ['breadcrumb' => $breadcrumb, 'page' => $page, 'user' => $user, 'activeMenu' => $activeMenu]);
     }
-    
+
     public function store(Request $request)
     {
         $request->validate([
@@ -113,7 +114,7 @@ class UserController extends Controller
 
         return redirect('/user')->with('success', 'Data berhasil disimpan');
     }
-    
+
     /**
      * edit.
      */
@@ -171,6 +172,48 @@ class UserController extends Controller
         } catch (\Illuminate\Database\QueryException $e) {
 
             return redirect('/user')->with('error', 'Data user gagal dihapus karena masih terdapat tabel lain yang terkait dengan data ini');
+        }
+    }
+
+    public function create_ajax()
+    {
+        $level = LevelModel::select('level_id', 'level_nama')->get();
+
+        return view('user.create_ajax')
+            ->with('level', $level);
+    }
+
+    public function store_ajax(Request $request)
+    {
+        // Cek apakah request berupa AJAX atau JSON
+        if ($request->ajax() || $request->wantsJson()) {
+            $rules = [
+                'level_id' => 'required|integer',
+                'username' => 'required|string|min:3|unique:m_user,username',
+                'nama'     => 'required|string|max:100',
+                'password' => 'required|min:6'
+            ];
+
+            $validator = Validator::make($request->all(), $rules);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validasi Gagal',
+                    'msgField' => $validator->errors(),
+                ]);
+            }
+
+            // Hash password sebelum disimpan
+            $data = $request->all();
+            $data['password'] = Hash::make($request->password);
+
+            UserModel::create($data);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Data User berhasil disimpan'
+            ]);
         }
     }
 }
