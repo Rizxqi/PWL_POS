@@ -238,32 +238,29 @@ $btn .= '<form class="d-inline-block" method="POST" action="'. url('/user/'.$use
             $rules = [
                 'level_id' => 'required|integer',
                 'username' => 'required|max:20|unique:m_user,username,' . $id . ',user_id',
-                'nama'    => 'required|max:100',
+                'nama' => 'required|max:100',
                 'password' => 'nullable|min:6|max:20'
             ];
-
             // use Illuminate\Support\Facades\Validator;
             $validator = Validator::make($request->all(), $rules);
-
             if ($validator->fails()) {
                 return response()->json([
-                    'status'    => false,    // respon json, true: berhasil, false: gagal 'message' => 'Validasi gagal.',
+                    'status' => false, // respon json, true: berhasil, false: gagal
+                    'message' => 'Validasi gagal.',
                     'msgField' => $validator->errors() // menunjukkan field mana yang error
                 ]);
             }
-
             $check = UserModel::find($id);
             if ($check) {
                 if (!$request->filled('password')) { // jika password tidak diisi, maka hapus dari request
                     $request->request->remove('password');
                 }
-
                 $check->update($request->all());
                 return response()->json([
                     'status' => true,
                     'message' => 'Data berhasil diupdate'
                 ]);
-            } else {
+            } else {    
                 return response()->json([
                     'status' => false,
                     'message' => 'Data tidak ditemukan'
