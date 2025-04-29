@@ -6,14 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class LevelModel extends Model
+class KategoriModel extends Model
 {
     use HasFactory;
-    protected $table = "m_level";
-    protected $primaryKey = "level_id";
-    protected $fillable = ['level_kode','level_nama'];
+    protected $table = "m_kategori";
+    protected $primaryKey = "kategori_id";
+    protected $fillable = ['kategori_kode','kategori_nama'];
 
-    public function users(): HasMany
+    public function barangs(): HasMany
     {
         return $this->hasMany(User::class);
     }

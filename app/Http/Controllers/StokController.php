@@ -2,57 +2,59 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\LevelModel;
+use App\Models\BarangModel;
+use App\Models\StokModel;
 use App\Models\UserModel;
+use Faker\Core\Barcode;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Monolog\Level;
 use Yajra\DataTables\Facades\DataTables;
 
-class UserController extends Controller
+class StokController extends Controller
 {
     public function index()
     {
         $breadcrumb = (object) [
-            'title' => 'Daftar User',
-            'list' => ['Home', 'User']
+            'title' => 'Daftar Stok',
+            'list' => ['Home', 'Stok']
         ];
 
         $page = (object)[
-            'title' => 'Daftar user yang telah terdaftar dalam sistem'
+            'title' => 'Daftar stok yang telah terdaftar dalam sistem'
         ];
 
-        $activeMenu = 'user';
+        $activeMenu = 'stok';
 
-        $level = LevelModel::all();
+        $barang = BarangModel::all();
 
-        return view('user.index', ['breadcrumb' => $breadcrumb, 'page' => $page, 'activeMenu' => $activeMenu, 'level' => $level]);
+        return view('stok.index', ['breadcrumb' => $breadcrumb, 'page' => $page, 'activeMenu' => $activeMenu, 'barang' => $barang]);
     }
 
     public function list(Request $request)
     {
-        $users = UserModel::select('user_id', 'username', 'nama', 'level_id')->with('level');
+        $stok = StokModel::select('stok_id', 'stok_tanggal', 'stok_jumlah', 'barang_id')->with('barang');
 
-        if ($request->level_id) {
-            $users->where('level_id', $request->level_id);
+        if ($request->barang_id) {
+            $stok->where('barang_id', $request->barang_id);
         }
 
-        return DataTables::of($users)
+        return DataTables::of($stok)
             // Tambahkan index untuk nomor urut
             ->addIndexColumn()
 
             // Tambahkan kolom aksi (Detail, Edit, Hapus)
-            ->addColumn('action', function ($user) { // menambahkan kolom aksi
-                /* $btn = '<a href="'.url('/user/' . $user->user_id).'" class="btn btn-info btn- sm">Detail</a> ';
-             $btn .= '<a href="'.url('/user/' . $user->user_id . '/edit').'" class="btn btn- warning btn-sm">Edit</a> ';
-            $btn .= '<form class="d-inline-block" method="POST" action="'. url('/user/'.$user-
-                >user_id).'">'
+            ->addColumn('action', function ($stok) { // menambahkan kolom aksi
+                /* $btn = '<a href="'.url('/stok/' . $stok->stok_id).'" class="btn btn-info btn- sm">Detail</a> ';
+             $btn .= '<a href="'.url('/stok/' . $stok->stok_id . '/edit').'" class="btn btn- warning btn-sm">Edit</a> ';
+            $btn .= '<form class="d-inline-block" method="POST" action="'. url('/stok/'.$stok-
+                >stok_id).'">'
                 . csrf_field() . method_field('DELETE') .
                     '<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Apakah Anda yakit menghapus data ini?\');">Hapus</button></form>';*/
-                $btn  = '<button onclick="modalAction(\'' . url('/user/' . $user->user_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/user/' . $user->user_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/user/' . $user->user_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Hapus</button> ';
+                $btn  = '<button onclick="modalAction(\'' . url('/stok/' . $stok->stok_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
+                $btn .= '<button onclick="modalAction(\'' . url('/stok/' . $stok->stok_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
+                $btn .= '<button onclick="modalAction(\'' . url('/stok/' . $stok->stok_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Hapus</button> ';
                 return $btn;
             })
 
@@ -74,10 +76,10 @@ class UserController extends Controller
             'title' => 'Tambah user baru'
         ];
 
-        $level = LevelModel::all(); // ambil data level untuk ditampilkan di form
+        $barang = BarangModel::all(); // ambil data level untuk ditampilkan di form
         $activeMenu = 'user'; // set menu yang sedang aktif 
 
-        return view('user.create', ['breadcrumb' => $breadcrumb, 'page' => $page, 'level' => $level, 'activeMenu' => $activeMenu]);
+        return view('user.create', ['breadcrumb' => $breadcrumb, 'page' => $page, 'level' => $barang, 'activeMenu' => $activeMenu]);
     }
 
     public function show(string $id)
@@ -95,7 +97,7 @@ class UserController extends Controller
 
         $activeMenu = 'user';
 
-        $level = LevelModel::all();
+        $level = BarangModel::all();
         return view('user.show', ['breadcrumb' => $breadcrumb, 'page' => $page, 'user' => $user, 'activeMenu' => $activeMenu]);
     }
 
@@ -124,8 +126,8 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        $user = UserModel::find($id);
-        $level = LevelModel::all();
+        $user = StokModel::find($id);
+        $level = BarangModel::all();
         $breadcrumb = [
             'title' => 'Edit User',
             'list' => ['Home', 'User', 'Edit']
@@ -164,7 +166,7 @@ class UserController extends Controller
 
     public function destroy(string $id)
     {
-        $check = UserModel::find($id);
+        $check = StokModel::find($id);
         if (!$check) {
             return redirect('/user')->with('error', 'Data user tidak ditemukan');
         }
@@ -181,21 +183,54 @@ class UserController extends Controller
 
     public function create_ajax()
     {
-        $level = LevelModel::select('level_id', 'level_nama')->get();
+        $breadcrumb = (object) [
+            'title' => 'Tambah Stok',
+            'list' => ['Home', 'Stok', 'Tambah']
+        ];
+    
+        $page = (object) [
+            'title' => 'Tambah Stok Baru'
+        ];
+    
+        $barang = BarangModel::select('barang_id', 'barang_nama')->get(); // ambil daftar barang
+        $activeMenu = 'stok'; // aktifkan menu stok
+    
+        return view('stok.create_ajax', [
+            'breadcrumb' => $breadcrumb,
+            'page' => $page,
+            'barang' => $barang,
+            'activeMenu' => $activeMenu
+        ]);
+    }    
 
-        return view('user.create_ajax')
-            ->with('level', $level);
+    public function get_current_stock(Request $request)
+    {
+        $barangId = $request->barang_id;
+
+        $stok = Stok::where('barang_id', $barangId)
+                    ->latest('stok_tanggal')
+                    ->first();
+
+        if ($stok) {
+            return response()->json([
+                'status' => true,
+                'current_stock' => $stok->stok_jumlah
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'current_stock' => 0
+            ]);
+        }
     }
 
     public function store_ajax(Request $request)
     {
-        // Cek apakah request berupa AJAX atau JSON
         if ($request->ajax() || $request->wantsJson()) {
             $rules = [
-                'level_id' => 'required|integer',
-                'username' => 'required|string|min:3|unique:m_user,username',
-                'nama'     => 'required|string|max:100',
-                'password' => 'required|min:6'
+                'barang_id' => 'required|integer',
+                'stok_tanggal' => 'required|date',
+                'stok_jumlah' => 'required|numeric|min:1'
             ];
 
             $validator = Validator::make($request->all(), $rules);
@@ -204,96 +239,103 @@ class UserController extends Controller
                 return response()->json([
                     'status' => false,
                     'message' => 'Validasi Gagal',
-                    'msgField' => $validator->errors(),
+                    'msgField' => $validator->errors()
                 ]);
             }
 
-            // Hash password sebelum disimpan
-            $data = $request->all();
-            $data['password'] = Hash::make($request->password);
-
-            UserModel::create($data);
+            // Simpan data
+            StokModel::create([
+                'barang_id' => $request->barang_id,
+                'user_id' => 1,
+                'stok_tanggal' => $request->stok_tanggal,
+                'stok_jumlah' => $request->stok_jumlah,
+            ]);
 
             return response()->json([
                 'status' => true,
-                'message' => 'Data User berhasil disimpan'
+                'message' => 'Data stok berhasil disimpan'
             ]);
         }
     }
 
     public function show_ajax(string $id)
     {
-        $user = UserModel::with('level')->find($id);
-
-        if (!$user) {
-            return view('user.show_ajax')->with('user', null);
+        $stok = StokModel::with('barang')->find($id);
+    
+        if (!$stok) {
+            return view('stok.show_ajax')->with('stok', null);
         }
-
-        return view('user.show_ajax', ['user' => $user]);
+    
+        return view('stok.show_ajax', ['stok' => $stok]);
     }
+    
 
     // menampilkan halaman form edit user ajax
     public function edit_ajax($id)
     {
-        $user = UserModel::find($id);
-        $level = LevelModel::select('level_id', 'level_nama')->get();
+        $stok = StokModel::find($id);
+        $barang = BarangModel::select('barang_id', 'barang_nama')->get();
 
-        return view('user.edit_ajax', ['user' => $user, 'level' => $level]);
+        return view('stok.edit_ajax', ['stok' => $stok, 'barang' => $barang]);
     }
 
     public function update_ajax(Request $request, $id)
     {
-        // cek apakah request dari ajax
         if ($request->ajax() || $request->wantsJson()) {
             $rules = [
-                'level_id' => 'required|integer',
-                'username' => 'required|max:20|unique:m_user,username,' . $id . ',user_id',
-                'nama' => 'required|max:100',
-                'password' => 'nullable|min:6|max:20'
+                'barang_id' => 'required|integer',
+                'stok_tanggal' => 'required|date',
+                'stok_jumlah' => 'required|numeric|min:1'
             ];
-            // use Illuminate\Support\Facades\Validator;
+
             $validator = Validator::make($request->all(), $rules);
+
             if ($validator->fails()) {
                 return response()->json([
-                    'status' => false, // respon json, true: berhasil, false: gagal
-                    'message' => 'Validasi gagal.',
-                    'msgField' => $validator->errors() // menunjukkan field mana yang error
+                    'status'   => false,
+                    'message'  => 'Validasi gagal.',
+                    'msgField' => $validator->errors()
                 ]);
             }
-            $check = UserModel::find($id);
-            if ($check) {
-                if (!$request->filled('password')) { // jika password tidak diisi, maka hapus dari request
-                    $request->request->remove('password');
-                }
-                $check->update($request->all());
+
+            $stok = StokModel::find($id);
+
+            if ($stok) {
+                $stok->update([
+                    'barang_id'     => $request->barang_id,
+                    'stok_tanggal'  => $request->stok_tanggal,
+                    'stok_jumlah'   => $request->stok_jumlah,
+                ]);
+
                 return response()->json([
-                    'status' => true,
-                    'message' => 'Data berhasil diupdate'
+                    'status'  => true,
+                    'message' => 'Data stok berhasil diupdate'
                 ]);
             } else {
                 return response()->json([
-                    'status' => false,
-                    'message' => 'Data tidak ditemukan'
+                    'status'  => false,
+                    'message' => 'Data stok tidak ditemukan'
                 ]);
             }
         }
-        return redirect('/user');
+
+        return redirect('/');
     }
 
     public function confirm_ajax(string $id)
     {
-        $user = UserModel::find($id);
+        $stok = StokModel::find($id);
 
-        return view('user.confirm_ajax', ['user' => $user]);
+        return view('stok.confirm_ajax', ['stok' => $stok]);
     }
 
     public function delete_ajax(Request $request, $id)
     {
         //cek apakah request dari ajax
         if ($request->ajax() || $request->wantsJson()) {
-            $user = UserModel::find($id);
-            if ($user) {
-                $user->delete();
+            $stok = StokModel::find($id);
+            if ($stok) {
+                $stok->delete();
                 return response()->json([
                     'status' => true,
                     'message' => 'Data berhasil dihapus'
@@ -305,6 +347,6 @@ class UserController extends Controller
                 ]);
             }
         }
-        return redirect('/user');
+        return redirect('/stok');
     }
 }
