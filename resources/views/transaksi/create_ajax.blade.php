@@ -1,135 +1,111 @@
-<form action="{{ url('/transaksi/ajax') }}" method="POST" id="form-tambah">
+<form action="{{ url('/transaksi/ajax') }}" method="POST" id="form-penjualan">
     @csrf
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Tambah Data Stok</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <h5 class="modal-title">Transaksi Penjualan</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
             <div class="modal-body">
+                <input type="hidden" name="user_id" value="{{ 1 }}">
                 <div class="form-group">
-                    <label>Stok Tanggal</label>
-                    <input type="datetime-local" name="penjualan_tanggal" id="penjualan_tanggal" class="form-control"
+                    <label>Kode Penjualan</label>
+                    <input type="text" name="penjualan_kode" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Nama Pembeli</label>
+                    <input type="text" name="pembeli" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Tanggal Penjualan</label>
+                    <input type="datetime-local" name="penjualan_tanggal" class="form-control"
                         value="{{ now()->format('Y-m-d\TH:i') }}" required>
-                    <small id="error-penjualan_tangal" class="error-text form-text text-danger"></small>
                 </div>
-                <div class="form-group">
-                    <label>Nama Barang</label>
-                    <select name="barang_id" id="barang_id" class="form-control" required>
-                        <option value="">- Pilih Barang -</option>
-                        @foreach ($barang as $b)
-                            <option value="{{ $b->barang_id }}">{{ $b->barang_nama }}</option>
-                        @endforeach
-                    </select>
-                    <small id="error-barang_id" class="error-text form-text text-danger"></small>
-                </div>
-                <div class="form-group">
-                    <label>Stok Jumlah</label>
-                    <input type="number" name="stok_jumlah" id="stok_jumlah" class="form-control" required>
-                    <small id="error-stok_jumlah" class="error-text form-text text-danger"></small>
-                </div>
+
+                <hr>
+                <h6>Detail Barang</h6>
+                <table class="table table-bordered" id="barang-table">
+                    <thead>
+                        <tr>
+                            <th>Barang</th>
+                            <th>Harga</th>
+                            <th>Jumlah</th>
+                            <th><button type="button" class="btn btn-sm btn-success" id="addRow">+</button></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="barang_id[]" class="form-control" required>
+                                    <option value="">- Pilih -</option>
+                                    @foreach ($barang as $b)
+                                        <option value="{{ $b->barang_id }}">{{ $b->barang_nama }}</option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td><input type="number" name="harga[]" class="form-control" required></td>
+                            <td><input type="number" name="jumlah[]" class="form-control" required></td>
+                            <td><button type="button" class="btn btn-sm btn-danger removeRow">x</button></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-warning">Batal</button>
-                <button type="submit" class="btn btn-primary">Simpan</button>
+                <button type="button" data-dismiss="modal" class="btn btn-secondary">Batal</button>
+                <button type="submit" class="btn btn-primary">Simpan Transaksi</button>
             </div>
         </div>
     </div>
 </form>
-
 <script>
     $(document).ready(function() {
-        // Auto fill stok_jumlah when barang is selected
-        $('#barang_id').change(function() {
-            var barangId = $(this).val();
-            if (barangId) {
-                $.ajax({
-                    url: '{{ url('stok/get_current_stock') }}',
-                    type: 'GET',
-                    data: {
-                        barang_id: barangId
-                    },
-                    success: function(response) {
-                        if (response.status) {
-                            $('#stok_jumlah').val(response.current_stock);
-                        } else {
-                            $('#stok_jumlah').val('');
-                        }
-                    },
-                    error: function() {
-                        $('#stok_jumlah').val('');
-                    }
-                });
-            } else {
-                $('#stok_jumlah').val('');
-            }
+        // Tambah baris barang
+        $('#addRow').click(function() {
+            let row = `<tr>
+                <td>
+                    <select name="barang_id[]" class="form-control" required>
+                        <option value="">- Pilih -</option>
+                        @foreach ($barang as $b)
+                            <option value="{{ $b->barang_id }}">{{ $b->barang_nama }}</option>
+                        @endforeach
+                    </select>
+                </td>
+                <td><input type="number" name="harga[]" class="form-control" required></td>
+                <td><input type="number" name="jumlah[]" class="form-control" required></td>
+                <td><button type="button" class="btn btn-sm btn-danger removeRow">x</button></td>
+            </tr>`;
+            $('#barang-table tbody').append(row);
         });
 
-        $("#form-tambah").validate({
-            rules: {
-                barang_id: {
-                    required: true,
-                    number: true
-                },
-                stok_tanggal: {
-                    required: true
-                },
-                stok_jumlah: {
-                    required: true,
-                    number: true,
-                    min: 0
-                }
-            },
-            submitHandler: function(form) {
-                $.ajax({
-                    url: form.action,
-                    type: form.method,
-                    data: $(form).serialize(),
-                    success: function(response) {
-                        if (response.status) {
-                            $('#myModal').modal('hide');
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil',
-                                text: response.message
-                            });
-                            dataStok.ajax.reload();
-                        } else {
-                            $('.error-text').text('');
-                            $.each(response.msgField, function(prefix, val) {
-                                $('#error-' + prefix).text(val[0]);
-                            });
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Terjadi Kesalahan',
-                                text: response.message
-                            });
-                        }
-                    },
-                    error: function(xhr) {
-                        console.error(xhr.responseText);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Terjadi Kesalahan',
-                            text: 'Gagal menyimpan data. Silakan coba lagi.'
-                        });
+        // Hapus baris
+        $(document).on('click', '.removeRow', function() {
+            $(this).closest('tr').remove();
+        });
+
+        // AJAX Submit
+        $('#form-penjualan').submit(function(e) {
+            e.preventDefault();
+            let formData = $(this).serialize();
+
+            $.ajax({
+                url: $(this).attr('action'),
+                method: 'POST',
+                data: formData,
+                success: function(res) {
+                    if (res.status) {
+                        $('#form-penjualan')[0].reset();
+                        $('#myModal').modal('hide');
+                        Swal.fire('Berhasil', res.message, 'success');
+                        // reload datatable if needed
+                    } else {
+                        Swal.fire('Gagal', res.message, 'error');
                     }
-                });
-                return false;
-            },
-            errorElement: 'span',
-            errorPlacement: function(error, element) {
-                error.addClass('invalid-feedback');
-                element.closest('.form-group').append(error);
-            },
-            highlight: function(element) {
-                $(element).addClass('is-invalid');
-            },
-            unhighlight: function(element) {
-                $(element).removeClass('is-invalid');
-            }
+                },
+                error: function(xhr) {
+                    console.error(xhr.responseText);
+                    Swal.fire('Error', 'Terjadi kesalahan server', 'error');
+                }
+            });
         });
     });
 </script>

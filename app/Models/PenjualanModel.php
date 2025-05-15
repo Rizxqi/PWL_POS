@@ -15,7 +15,7 @@ class PenjualanModel extends Model
 
     public function detail_penjualan(): HasMany
     {
-        return $this->hasMany(DetailPenjualanModel::class, 'detail_id', 'detail_ID');
+        return $this->hasMany(DetailPenjualanModel::class, 'detail_id', 'detail_id');
     }
     public function barang()
     {

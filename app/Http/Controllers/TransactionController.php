@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\PenjualanModel;
 use App\Models\DetailPenjualanModel;
+use App\Models\BarangModel;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -52,18 +54,67 @@ class TransactionController extends Controller
             ->make(true);
     }
 
-    public function show_ajax(string $id)
+    public function create_ajax()
     {
-        $detail = DetailPenjualanModel::with('penjualan', 'barang')->find($id);
+        $barang = BarangModel::select('barang_id', 'barang_nama', 'harga_jual')->get(); // misal ada
+        return view('transaksi.create_ajax')->with('barang', $barang);
+    }
 
-        if (!$detail) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Data tidak ditemukan'
-            ]);
+    public function store_ajax(Request $request)
+    {
+        if ($request->ajax()) {
+            $rules = [
+                'user_id' => 'required|integer',
+                'pembeli' => 'required|string',
+                'penjualan_kode' => 'required|string',
+                'penjualan_tanggal' => 'required|date',
+                'barang_id' => 'required|array',
+                'harga' => 'required|array',
+                'jumlah' => 'required|array',
+            ];
+    
+            $validator = Validator::make($request->all(), $rules);
+    
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validasi gagal',
+                    'msgField' => $validator->errors()
+                ]);
+            }
+    
+            // Convert datetime to MySQL format
+            $formattedDate = date('Y-m-d H:i:s', strtotime($request->penjualan_tanggal));
+    
+            try {
+                DB::statement('CALL simpan_penjualan_detail(?, ?, ?, ?, ?, ?, ?)', [
+                    $request->user_id,
+                    $request->pembeli,
+                    $request->penjualan_kode,
+                    $formattedDate,
+                    json_encode($request->barang_id),
+                    json_encode($request->harga),
+                    json_encode($request->jumlah),
+                ]);
+    
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Data penjualan berhasil disimpan'
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Gagal menyimpan data: ' . $e->getMessage()
+                ]);
+            }
         }
+    }
 
-        return view('transaksi.show_ajax', ['detail' => $detail]);
+    public function show($id)
+    {
+        $transaksi = PenjualanModel::with(['user', 'detail.barang'])->find($id);
+
+        return view('transaksi.show_ajax', compact('transaksi'));
     }
 
     public function edit_ajax(string $id)
