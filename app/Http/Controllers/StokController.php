@@ -207,7 +207,7 @@ class StokController extends Controller
     {
         $barangId = $request->barang_id;
 
-        $stok = Stok::where('barang_id', $barangId)
+        $stok = StokModel::where('barang_id', $barangId)
                     ->latest('stok_tanggal')
                     ->first();
 

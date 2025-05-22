@@ -62,6 +62,7 @@ class TransactionController extends Controller
 
     public function store_ajax(Request $request)
     {
+
         if ($request->ajax()) {
             $rules = [
                 'user_id' => 'required|integer',
@@ -72,9 +73,9 @@ class TransactionController extends Controller
                 'harga' => 'required|array',
                 'jumlah' => 'required|array',
             ];
-    
+
             $validator = Validator::make($request->all(), $rules);
-    
+
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
@@ -82,21 +83,21 @@ class TransactionController extends Controller
                     'msgField' => $validator->errors()
                 ]);
             }
-    
-            // Convert datetime to MySQL format
-            $formattedDate = date('Y-m-d H:i:s', strtotime($request->penjualan_tanggal));
-    
+
             try {
+                $formattedDate = date('Y-m-d H:i:s', strtotime($request->penjualan_tanggal));
+
                 DB::statement('CALL simpan_penjualan_detail(?, ?, ?, ?, ?, ?, ?)', [
-                    $request->user_id,
-                    $request->pembeli,
-                    $request->penjualan_kode,
-                    $formattedDate,
-                    json_encode($request->barang_id),
-                    json_encode($request->harga),
-                    json_encode($request->jumlah),
+                    $request->penjualan_kode,             // kode (VARCHAR)
+                    $request->pembeli,                    // nama_pembeli (VARCHAR)
+                    $formattedDate,                       // tanggal (DATETIME)
+                    $request->user_id,                    // uid (INT)
+                    json_encode($request->barang_id),     // barang_json (JSON)
+                    json_encode($request->harga),         // harga_json (JSON)
+                    json_encode($request->jumlah),        // jumlah_json (JSON)
                 ]);
-    
+
+
                 return response()->json([
                     'status' => true,
                     'message' => 'Data penjualan berhasil disimpan'
@@ -112,6 +113,7 @@ class TransactionController extends Controller
 
     public function show($id)
     {
+
         $transaksi = PenjualanModel::with(['user', 'detail.barang'])->find($id);
 
         return view('transaksi.show_ajax', compact('transaksi'));
@@ -131,46 +133,47 @@ class TransactionController extends Controller
         return view('transaksi.edit_ajax', ['detail' => $detail]);
     }
 
-    public function update_ajax(Request $request, string $id)
+    public function update_ajax(Request $request, $id)
     {
-        if ($request->ajax() || $request->wantsJson()) {
-            $rules = [
-                'jumlah' => 'required|integer|min:1',
-                'harga_satuan' => 'required|integer|min:0'
-            ];
+        $validator = Validator::make($request->all(), [
+            'jumlah' => 'required|numeric|min:1',
+            'harga'  => 'required|numeric|min:0',
+        ]);
 
-            $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validasi gagal',
+                'msgField' => $validator->errors()
+            ]);
+        }
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Validasi gagal.',
-                    'msgField' => $validator->errors()
-                ]);
-            }
-
+        try {
             $detail = DetailPenjualanModel::find($id);
-
-            if ($detail) {
-                $detail->update([
-                    'jumlah' => $request->jumlah,
-                    'harga_satuan' => $request->harga_satuan
-                ]);
-
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Data berhasil diupdate'
-                ]);
-            } else {
+            if (!$detail) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Data tidak ditemukan'
                 ]);
             }
-        }
 
-        return redirect('/');
+            $detail->jumlah = $request->jumlah;
+            $detail->harga = $request->harga;
+            $detail->save();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Data berhasil diperbarui'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
     }
+
+
 
     public function confirm_ajax(string $id)
     {

@@ -7,7 +7,7 @@
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
             <div class="modal-body">
-                <input type="hidden" name="user_id" value="{{ 1 }}">
+                <input type="hidden" name="user_id" value="{{1}}">
                 <div class="form-group">
                     <label>Kode Penjualan</label>
                     <input type="text" name="penjualan_kode" class="form-control" required>

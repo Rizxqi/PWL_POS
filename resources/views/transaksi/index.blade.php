@@ -128,9 +128,8 @@
                         } // Action
                     ]
                 });
-
                 $('#penjualan').change(function() {
-                    dataPenjualan.ajax.reload(); // Reload table kalau filter berubah
+                    window.dataPenjualan.ajax.reload();
                 });
             });
         </script>
