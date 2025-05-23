@@ -6,8 +6,10 @@
             <div class="card-tools">
 
                 <button onclick="modalAction('{{ url('/barang/import') }}')" class="btn btn-info">Import Barang</button>
-                <a href="{{ url('/barang/create') }}" class="btn btn-primary">Tambah Data</a>
-                <button onclick="modalAction('{{ url('/barang/create_ajax') }}')" class="btn btn-success">Tambah Data (Ajax)</button>
+                <a href="{{ url('/barang/export_excel') }}" class="btn btn-primary">
+                    <i class="fa fa-file-excel"></i> Export Barang</a>
+                <button onclick="modalAction('{{ url('/barang/create_ajax') }}')" class="btn btn-success">Tambah Data
+                    (Ajax)</button>
             </div>
         </div>
         <div class="card-body">
@@ -59,12 +61,12 @@
 @push('js')
     <script>
         function modalAction(url = '') {
-            $('#myModal').load(url, function() {
+            $('#myModal').load(url, function () {
                 $('#myModal').modal('show');
             });
         }
         var tableBarang;
-        $(document).ready(function() {
+        $(document).ready(function () {
             tableBarang = $('#table-barang').DataTable({
                 processing: true,
                 serverSide: true,
@@ -72,7 +74,7 @@
                     "url": "{{ url('barang/list') }}",
                     "dataType": "json",
                     "type": "POST",
-                    "data": function(d) {
+                    "data": function (d) {
                         d.filter_kategori = $('.filter_kategori').val();
                     }
                 },
@@ -100,7 +102,7 @@
                     width: "10%",
                     orderable: true,
                     searchable: false,
-                    render: function(data, type, row) {
+                    render: function (data, type, row) {
                         return new Intl.NumberFormat('id-ID').format(data);
                     }
                 }, {
@@ -109,7 +111,7 @@
                     width: "10%",
                     orderable: true,
                     searchable: false,
-                    render: function(data, type, row) {
+                    render: function (data, type, row) {
                         return new Intl.NumberFormat('id-ID').format(data);
                     }
                 }, {
@@ -126,12 +128,12 @@
                     searchable: false
                 }]
             });
-            $('#table-barang_filter input').unbind().bind().on('keyup', function(e) {
+            $('#table-barang_filter input').unbind().bind().on('keyup', function (e) {
                 if (e.keyCode == 13) { // enter key
                     tableBarang.search(this.value).draw();
                 }
             });
-            $('.filter_kategori').change(function() {
+            $('.filter_kategori').change(function () {
                 tableBarang.draw();
             });
         });
