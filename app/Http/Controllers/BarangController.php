@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 use App\Models\LevelModel;
 use App\Models\BarangModel;
 use App\Models\KategoriModel;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -289,18 +290,34 @@ class BarangController extends Controller
         $sheet->setTitle('Data Barang ');// set title sheet 
 
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-        $filename = 'Data barang'.date('Y-m-d H:i:s').'.xlsx';
+        $filename = 'Data barang' . date('Y-m-d H:i:s') . '.xlsx';
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="'.$filename.'"');
-        header('Cache-Control: max-age = 0');       
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age = 0');
         header('Cache-Control: max-age = 1');
         header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
         header('Last-Modified: ' . gmdate('D,d M Y H:i:s') . 'GMT');
-        header("Cache-Control: cache, must-revalidate"); 
-        header('Pragma: public');      
+        header("Cache-Control: cache, must-revalidate");
+        header('Pragma: public');
 
         $writer->save('php://output');
         exit;
     } // end funciton export_excel
+
+    public function export_pdf()
+    {
+        $barang = BarangModel::select('kategori_id', 'barang_kode', 'barang_nama', 'harga_beli', 'harga_jual')
+            ->orderBy('kategori_id')
+            ->orderBy('barang_kode')
+            ->with('kategori')
+            ->get();
+        // Use barryvdh\dompdf\facade\Pdf;
+        $pdf = Pdf::loadview('barang.export_pdf',['barang'=>$barang]);
+        $pdf->setPaper('a4','potrait'); // set ukuran kertas dan orientasi
+        $pdf->setOption("isRemoteEnabled", true);
+        $pdf->render();
+
+        return $pdf->stream('Data Barang' .date('Y-m-d H:i:s').'.pdf');
+    }
 }
