@@ -1,22 +1,29 @@
-<?php 
+<?php
 
 namespace App\Models;
 
+use Illuminate\Foundation\Auth\User as Authenticatable; // ← ini HARUS benar
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Foundation\Auth\User as Authenticable ; 
 
-class UserModel extends Authenticable
+class UserModel extends Authenticatable
 {
     use HasFactory;
-    
-    protected  $table = 'm_user';
-    protected  $primaryKey = 'user_id';
-    protected $fillable = ['level_id','username','nama','password','created_at', 'updated_at'];
+
+    protected $table = 'm_user';
+    protected $primaryKey = 'user_id';
+
+    protected $fillable = [
+        'level_id',
+        'username',
+        'nama',
+        'password',
+        'foto',
+        'created_at',
+        'updated_at'
+    ];
 
     protected $hidden = ['password'];
-
     protected $casts = ['password' => 'hashed'];
 
     public function level(): BelongsTo
@@ -24,12 +31,12 @@ class UserModel extends Authenticable
         return $this->belongsTo(LevelModel::class, 'level_id', 'level_id');
     }
 
-    public function getRolename():string
+    public function getRolename(): string
     {
         return $this->level->level_nama;
     }
 
-    public function hasRole($role):bool
+    public function hasRole($role): bool
     {
         return $this->level->level_kode == $role;
     }

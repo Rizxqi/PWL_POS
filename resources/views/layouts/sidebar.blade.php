@@ -1,4 +1,18 @@
+<!-- Sidebar -->
 <div class="sidebar">
+    <!-- Sidebar user panel (optional) -->
+    <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <div class="image">
+            <a href="{{ url('/profile') }}" class="nav-link {{ ($activeMenu ?? '') == 'profile' ? 'active' : '' }}">
+                <img src="{{ asset('storage/profile/' . (auth()->user()->foto ?? 'default.png')) }}"
+                    class="img-circle elevation-2" alt="User Image" width="35" height="35">
+            </a>
+        </div>
+        <div class="info">
+            <a href="#" class="d-block">Alexander Pierce</a>
+            {{-- <a href="{{ route('profile.index') }}" class="d-block">{{ auth()->user()->nama }}></a> --}}
+        </div>
+    </div>
     <!-- SidebarSearch Form -->
     <div class="form-inline mt-2">
         <div class="input-group" data-widget="sidebar-search">
@@ -10,18 +24,27 @@
             </div>
         </div>
     </div>
+
     <!-- Sidebar Menu -->
     <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+            {{-- <li class="nav-item">
+                <a href="{{ url('profile') }}" class="nav-link {{ $activeMenu == 'profile' ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-user"></i>
+                    <p>Profil</p>
+                </a>
+            </li> --}}
             <li class="nav-item">
-                <a href="{{ url('/') }}" class="nav-link {{ $activeMenu == 'dashboard' ? 'active' : '' }} ">
+                {{-- <a href="{{ url('/') }}" class="nav-link {{ $activeMenu == 'dashboard' ? 'active' : '' }}"> --}}
+                <a href="{{ url('/') }}" class="nav-link {{ ($activeMenu ?? '') == 'dashboard' ? 'active' : '' }}">
                     <i class="nav-icon fas fa-tachometer-alt"></i>
                     <p>Dashboard</p>
                 </a>
             </li>
+
             <li class="nav-header">User Data</li>
             <li class="nav-item">
-                <a href="{{ url('/level') }}" class="nav-link {{ $activeMenu == 'level' ? 'active' : '' }} ">
+                <a href="{{ url('/level') }}" class="nav-link {{ $activeMenu == 'level' ? 'active' : '' }}">
                     <i class="nav-icon fas fa-layer-group"></i>
                     <p>Level User</p>
                 </a>
@@ -32,28 +55,30 @@
                     <p>Data User</p>
                 </a>
             </li>
+
             <li class="nav-header">Item Data</li>
             <li class="nav-item">
-                <a href="{{ url('/kategori') }}" class="nav-link {{ $activeMenu == 'kategori' ? 'active' : '' }} ">
+                <a href="{{ url('/kategori') }}" class="nav-link {{ $activeMenu == 'kategori' ? 'active' : '' }}">
                     <i class="nav-icon far fa-bookmark"></i>
                     <p>Goods Category</p>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ url('/barang') }}" class="nav-link {{ $activeMenu == 'barang' ? 'active' : '' }} ">
+                <a href="{{ url('/barang') }}" class="nav-link {{ $activeMenu == 'barang' ? 'active' : '' }}">
                     <i class="nav-icon far fa-list-alt"></i>
                     <p>Goods Data</p>
                 </a>
             </li>
+
             <li class="nav-header">Transaction Data</li>
             <li class="nav-item">
-                <a href="{{ url('/stok') }}" class="nav-link {{ $activeMenu == 'stok' ? 'active' : '' }} ">
+                <a href="{{ url('/stok') }}" class="nav-link {{ $activeMenu == 'stok' ? 'active' : '' }}">
                     <i class="nav-icon fa-cubes"></i>
                     <p>Stock of Goods</p>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ url('/transaksi') }}" class="nav-link {{ $activeMenu == 'transaksi' ? 'active' : '' }} ">
+                <a href="{{ url('/transaksi') }}" class="nav-link {{ $activeMenu == 'transaksi' ? 'active' : '' }}">
                     <i class="nav-icon fas fa-cash-register"></i>
                     <p>Sales Transactions</p>
                 </a>

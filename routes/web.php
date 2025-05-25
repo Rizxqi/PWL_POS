@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\BarangController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StokController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\WelcomeController;
@@ -18,17 +19,23 @@ Route::get('login', [AuthController::class, 'login'])->name('login');
 Route::post('login', [AuthController::class, 'postlogin']);
 Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
 Route::get('/register', [AuthController::class, 'register'])->name('register');
-Route::post('/register', [AuthController::class, 'postregister']);
-
 
 // Middleware Auth (kosong, isi jika perlu membatasi akses)
 Route::middleware(['auth'])->group(function () {
 
     // Letakkan route yang membutuhkan login di sini jika diperlukan
-
     Route::get('/', [WelcomeController::class, 'index']);
 
-    Route::middleware(['authorize:ADM'])->prefix('level')->group(function (){
+    // Halaman profil
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+
+    // Update data profil (nama, dll)
+    Route::post('/profile/edit', [ProfileController::class, 'update'])->name('profile.update');
+
+    // Update foto profil
+    Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo');
+    
+    Route::middleware(['authorize:ADM'])->prefix('level')->group(function () {
         Route::get('/', [LevelController::class, 'index']);
         Route::post('/list', [LevelController::class, 'list']);
         Route::get('/create_ajax', [LevelController::class, 'create_ajax']);
@@ -71,7 +78,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/{id}', [KategoriController::class, 'destroy']);
     });
 
-    Route::middleware(['authorize:ADM'])->prefix('barang')->group(function() {
+    Route::middleware(['authorize:ADM'])->prefix('barang')->group(function () {
         Route::get('/', [BarangController::class, 'index']);
         Route::post('/list', [BarangController::class, 'list']);
         Route::get('/create', [BarangController::class, 'create']);
