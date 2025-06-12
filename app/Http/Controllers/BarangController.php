@@ -313,11 +313,11 @@ class BarangController extends Controller
             ->with('kategori')
             ->get();
         // Use barryvdh\dompdf\facade\Pdf;
-        $pdf = Pdf::loadview('barang.export_pdf',['barang'=>$barang]);
-        $pdf->setPaper('a4','potrait'); // set ukuran kertas dan orientasi
+        $pdf = Pdf::loadview('barang.export_pdf', ['barang' => $barang]);
+        $pdf->setPaper('a4', 'potrait'); // set ukuran kertas dan orientasi
         $pdf->setOption("isRemoteEnabled", true);
         $pdf->render();
 
-        return $pdf->stream('Data Barang' .date('Y-m-d H:i:s').'.pdf');
+        return $pdf->stream('Data Barang' . date('Y-m-d H:i:s') . '.pdf');
     }
 }
