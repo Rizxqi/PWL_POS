@@ -11,7 +11,7 @@ use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 
-// Validasi pola parameter 'id' hanya boleh angka
+// Validasi pola parameter 'id' hanya boleh angka   
 Route::pattern('id', '[0-9]+');
 
 // Auth

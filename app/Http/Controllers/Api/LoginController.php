@@ -10,33 +10,37 @@ class LoginController extends Controller
 {
     public function __invoke(Request $request)
     {
-        //set validation 
+        // Validasi input
         $validator = Validator::make($request->all(), [
             'username' => 'required',
             'password' => 'required'
         ]);
 
-        //if validation fails
-        if ($validator->fails()){
-            return response()->json($validator->errors(), 422);
+        // Jika validasi gagal
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'input' => $request->all(),
+                'errors' => $validator->errors(),
+            ], 422);
         }
 
-        //get credentials from request 
-        $credentials = $request->only('username','password');
+        // Ambil data username dan password
+        $credentials = $request->only('username', 'password');
 
-        //if auth fails 
+        // Jika login gagal
         if (!$token = auth()->guard('api')->attempt($credentials)) {
             return response()->json([
                 'success' => false,
-                'message'=> 'Username atau Password anda Salah'
-            ],401);
+                'message' => 'Username atau password salah.',
+            ], 401);
         }
 
-        //if auth success 
+        // Login berhasil
         return response()->json([
-            'success'   => true,
-            'user'      => auth()->guard('api')->user(),
-            'token'     => $token
-        ],200);
+            'success' => true,
+            'user' => auth()->guard('api')->user(),
+            'token' => $token,
+        ], 200);
     }
 }
