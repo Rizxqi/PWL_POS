@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Foundation\Auth\User as Authenticatable; // ← ini HARUS benar
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Database\Eloquent\Model;
 
 class UserModel extends Authenticatable implements JWTSubject
 {
@@ -30,7 +32,8 @@ class UserModel extends Authenticatable implements JWTSubject
         'password',
         'foto',
         'created_at',
-        'updated_at'
+        'updated_at',
+        'image'
     ];
 
     protected $hidden = ['password'];
@@ -39,6 +42,13 @@ class UserModel extends Authenticatable implements JWTSubject
     public function level(): BelongsTo
     {
         return $this->belongsTo(LevelModel::class, 'level_id', 'level_id');
+    }
+
+    protected function image(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($image) => url('/storage/posts'. $image),
+        );
     }
 
     public function getRolename(): string
