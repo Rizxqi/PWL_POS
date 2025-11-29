@@ -23,13 +23,13 @@
                     <!-- small card -->
                     <div class="small-box bg-info">
                         <div class="inner">
-                            <h3>Total Transaksi</h3>
-                            <p>New Orders</p>
+                            <h3>{{ $totalTransaksi }}</h3>
+                            <p>Total Transaksi</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-shopping-cart"></i>
                         </div>
-                        <a href="#" class="small-box-footer">
+                        <a href="{{ url('transaksi') }}" class="small-box-footer">
                             More info <i class="fas fa-arrow-circle-right"></i>
                         </a>
                     </div>
@@ -129,7 +129,7 @@
                     ]
                 });
                 $('#penjualan').change(function() {
-                    window.dataPenjualan.ajax.reload();
+                   dataPenjualan.ajax.reload();
                 });
             });
         </script>

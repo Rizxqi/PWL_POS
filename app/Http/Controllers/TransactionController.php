@@ -22,7 +22,7 @@ class TransactionController extends Controller
         $page = (object) [
             'title' => 'Daftar transaksi yang terdaftar dalam sistem'
         ];
-
+        $totalTransaksi = PenjualanModel::count();
         $penjualan = PenjualanModel::all();
         $activeMenu = 'transaksi';
 
@@ -30,6 +30,7 @@ class TransactionController extends Controller
             'breadcrumb' => $breadcrumb,
             'page' => $page,
             'penjualan' => $penjualan,
+            'totalTransaksi' => $totalTransaksi,
             'activeMenu' => $activeMenu
         ]);
     }
@@ -45,7 +46,7 @@ class TransactionController extends Controller
         return DataTables::of($query)
             ->addIndexColumn()
             ->addColumn('aksi', function ($row) {
-                $btn  = '<button onclick="modalAction(\'' . url('/transaksi/' . $row->detail_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
+                $btn = '<button onclick="modalAction(\'' . url('/transaksi/' . $row->detail_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/transaksi/' . $row->detail_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/transaksi/' . $row->detail_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Hapus</button>';
                 return $btn;
@@ -137,7 +138,7 @@ class TransactionController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'jumlah' => 'required|numeric|min:1',
-            'harga'  => 'required|numeric|min:0',
+            'harga' => 'required|numeric|min:0',
         ]);
 
         if ($validator->fails()) {

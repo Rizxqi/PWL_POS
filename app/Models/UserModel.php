@@ -20,6 +20,12 @@ class UserModel extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+    public function getAuthIdentifierName()
+    {
+        return 'username';
+    }
+
     use HasFactory;
 
     protected $table = 'm_user';
